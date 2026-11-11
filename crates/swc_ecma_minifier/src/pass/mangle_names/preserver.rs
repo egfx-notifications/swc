@@ -9,6 +9,13 @@ use crate::{option::MangleOptions, usage_analyzer::marks::Marks};
 
 pub(crate) struct PreversedIdents {
     pub preserved: FxHashSet<Id>,
+    /// Names that stay visible as the inner binding of a named class
+    /// expression (`let a = class Foo {}`) when `keep_class_names` is set.
+    ///
+    /// The outer binding of such a class may be mangled, but no other binding
+    /// may be renamed to one of these names: the inner binding would shadow it
+    /// inside the class body.
+    pub kept_class_names: FxHashSet<Atom>,
     pub idents: Option<Vec<Atom>>,
 }
 
@@ -20,6 +27,7 @@ where
     let mut v = Preserver {
         options,
         preserved: Default::default(),
+        kept_class_names: Default::default(),
         should_preserve: false,
         in_top_level: false,
 
@@ -49,6 +57,7 @@ where
         .collect();
     PreversedIdents {
         preserved: v.preserved,
+        kept_class_names: v.kept_class_names,
         idents: if options.disable_char_freq {
             None
         } else {
@@ -61,6 +70,7 @@ pub(crate) struct Preserver<'a> {
     options: &'a MangleOptions,
 
     preserved: FxHashSet<Id>,
+    kept_class_names: FxHashSet<Atom>,
 
     should_preserve: bool,
     in_top_level: bool,
@@ -129,6 +139,12 @@ impl Visit for Preserver<'_> {
             || self.is_reserved(&n.ident)
         {
             self.preserved.insert(n.ident.to_id());
+        } else if self.options.keep_class_names {
+            // The renamer rewrites this declaration into `let <mangled> = class
+            // <orig> {}`, so `<orig>` is still bound inside the class body.
+            // Reserve it so that no other variable is mangled into that name
+            // and captured by the class's own binding.
+            self.kept_class_names.insert(n.ident.sym.clone());
         }
     }
 
