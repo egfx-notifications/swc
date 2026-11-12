@@ -17,11 +17,11 @@ if [ ! -d "$TARGET_DIR" ]; then
 fi
 
 # Add patch section to Cargo.toml
-echo '[patch.crates-io]' >> bindings/Cargo.toml
-./scripts/cargo/patch-section.sh >> bindings/Cargo.toml
+echo '[patch.crates-io]' >> Cargo.toml
+./scripts/cargo/patch-section.sh >> Cargo.toml
 
 # Update cargo dependencies
-(cd bindings && cargo update -p swc_core -p swc_ts_fast_strip)
+cargo update -p swc_core -p swc_ts_fast_strip
 
 # Build the project
 pnpm build:dev
@@ -55,7 +55,7 @@ if ! grep -q '"@swc/core"' "$TARGET_DIR/package.json"; then
     echo "Then run:"
     echo
     echo -e "    \033[32m$\033[0m cd $CURRENT_DIR"
-    echo -e "    \033[32m$\033[0m git restore bindings/Cargo.toml bindings/Cargo.lock"
+    echo -e "    \033[32m$\033[0m git restore Cargo.toml Cargo.lock"
     echo
     echo "After that, you can run this script again."
     exit 1

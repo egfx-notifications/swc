@@ -150,7 +150,7 @@ Run the patch script from the repo root, providing the path to your project as t
 
 The script will:
 
-- Add necessary patches to `bindings/Cargo.toml`
+- Add necessary patches to `Cargo.toml`
 - Update Cargo dependencies
 - Build the project
 - Update your project's `package.json` to use the local `@swc/core`
@@ -162,7 +162,7 @@ To revert the changes:
 1. Restore the original Cargo files in this repository:
 
     ```bash
-    git restore bindings/Cargo.toml bindings/Cargo.lock
+    git restore Cargo.toml Cargo.lock
     ```
 
 2. Update your overridden project's `package.json` to use the published version of `@swc/core`
